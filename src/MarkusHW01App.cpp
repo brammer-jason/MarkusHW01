@@ -22,6 +22,8 @@ class MarkusHW01App : public AppBasic {
 	void drawRect(uint8_t* ar, int x,int y, int w, int h, Color8u c);
 	void drawCirc(uint8_t* ar, int x,int y, double r, Color8u c);
 	void drawLine(uint8_t* ar, int x, int y, int x2, int y2, Color8u c);
+	void drawTri(uint8_t* ar, int x, int y, int x2, int y2, int x3, int y3, Color8u c);
+	void blur(uint8_t* ar, float a,  float b,  float c,  float d,  float e,  float f,  float g,  float h,  float i);
 
   private:
 	float color1;
@@ -32,7 +34,19 @@ class MarkusHW01App : public AppBasic {
 	uint8_t* pixelArray;
 	int width;
 	float a;
-
+	int blured;
+	int trix1;
+	int trix2;
+	int trix3;
+	int triy1;
+	int triy2;
+	int triy3;
+	int time;
+	int circx;
+	int circy;
+	int col1;
+	int col2;
+	int col3;
 };
 
 
@@ -43,12 +57,32 @@ void MarkusHW01App::setup()
 	color3 = 1.0;
 	iteration = 0;
 	width = 640;
+	blured = 0;
+	trix1 = 0;
+	trix2 = 0;
+	trix3 = 0;
+	triy1 = 0;
+	triy2 = 0;
+	triy3 = 0;
+	time = 0;
+	circx = 0;
+	circy = 0;
+	col1 = 0;
+	col2 = 0;
+	col3 = 0;
 
 	mySurface_ = new Surface(1024,1024,false);
 };
 
 void MarkusHW01App::mouseDown( MouseEvent event )
 {
+	
+	if(blured == 0){
+		blured = 1;
+	}
+	else{
+		blured = 0;
+	};
 };
 
 void MarkusHW01App::setPixel(uint8_t* ar, int x,int y, Color8u c)
@@ -89,6 +123,9 @@ void MarkusHW01App::drawLine(uint8_t* ar, int x, int y, int x2, int y2, Color8u 
 			temp = x;
 			x = x2;
 			x2 = temp;
+			temp = y;
+			y = y2;
+			y2 = temp;
 		};
 		for (int i = x; i < x2; i++){
 			yv = m * i - m * x + y + 0.5;
@@ -100,6 +137,9 @@ void MarkusHW01App::drawLine(uint8_t* ar, int x, int y, int x2, int y2, Color8u 
 			temp = y;
 			y = y2;
 			y2 = temp;
+			temp = x;
+			x = x2;
+			x2 = temp;
 		};
 		for (int i = y; i < y2; i++){
 			yv = m * i - m * x + y + 0.5;
@@ -109,15 +149,60 @@ void MarkusHW01App::drawLine(uint8_t* ar, int x, int y, int x2, int y2, Color8u 
 	};
 };
 
+void MarkusHW01App::drawTri(uint8_t* ar, int x, int y, int x2, int y2, int x3, int y3, Color8u c){
+	drawLine(ar, x, y, x2, y2, c);
+	drawLine(ar, x, y, x3, y3, c);
+	drawLine(ar, x3, y3, x2, y2, c);
+	
+};
+
+void MarkusHW01App::blur(uint8_t* ar , float a,  float b,  float c,  float d,  float e,  float f,  float g,  float h,  float i){
+
+	float kernel [9] = {a,b,c,d,e,f,g,h,i};
+	for(int i = 0; i < 640; i++){
+		for(int j = 0; j < 480; j++){
+			ar[j * 1024 * 3 + 3 * i] = ar[(j - 1) * 1024 * 3 + 3 * (i - 1)] * kernel[0] + ar[(j - 1) * 1024 * 3 + 3 * (i)] * kernel[1] + ar[(j - 1) * 1024 * 3 + 3 * (i + 1)] * kernel[2] + ar[(j) * 1024 * 3 + 3 * (i - 1)] * kernel[3] + ar[(j) * 1024 * 3 + 3 * (i)] * kernel[4] + ar[(j) * 1024 * 3 + 3 * (i + 1)] * kernel[5] + ar[(j + 1) * 1024 * 3 + 3 * (i - 1)] * kernel[6] + ar[(j + 1) * 1024 * 3 + 3 * (i)] * kernel[7] + ar[(j + 1) * 1024 * 3 + 3 * (i + 1)] * kernel[8];
+			ar[j * 1024 * 3 + 3 * i + 1] = ar[(j - 1) * 1024 * 3 + 3 * (i - 1) + 1] * kernel[0] + ar[(j - 1) * 1024 * 3 + 3 * (i) + 1] * kernel[1] + ar[(j - 1) * 1024 * 3 + 3 * (i + 1) + 1] * kernel[2] + ar[(j) * 1024 * 3 + 3 * (i - 1) + 1] * kernel[3] + ar[(j) * 1024 * 3 + 3 * (i) + 1] * kernel[4] + ar[(j) * 1024 * 3 + 3 * (i + 1) + 1] * kernel[5] + ar[(j + 1) * 1024 * 3 + 3 * (i - 1) + 1] * kernel[6] + ar[(j + 1) * 1024 * 3 + 3 * (i) + 1] * kernel[7] + ar[(j + 1) * 1024 * 3 + 3 * (i + 1) + 1] * kernel[8];
+			ar[j * 1024 * 3 + 3 * i + 2] = ar[(j - 1) * 1024 * 3 + 3 * (i - 1) + 2] * kernel[0] + ar[(j - 1) * 1024 * 3 + 3 * (i) + 2] * kernel[1] + ar[(j - 1) * 1024 * 3 + 3 * (i + 1) + 2] * kernel[2] + ar[(j) * 1024 * 3 + 3 * (i - 1) + 2] * kernel[3] + ar[(j) * 1024 * 3 + 3 * (i) + 2] * kernel[4] + ar[(j) * 1024 * 3 + 3 * (i + 1) + 2] * kernel[5] + ar[(j + 1) * 1024 * 3 + 3 * (i - 1) + 2] * kernel[6] + ar[(j + 1) * 1024 * 3 + 3 * (i) + 2] * kernel[7] + ar[(j + 1) * 1024 * 3 + 3 * (i + 1) + 2] * kernel[8];
+		};
+	};
+};
+
 void MarkusHW01App::update()
 {
 	uint8_t* pixelArray = (*mySurface_).getData();
 
-	drawRect(pixelArray, 0, 0, 640, 480, Color8u(0, 0, 0));
+	time++;
 
-	drawCirc(pixelArray, 320, 240, 220, Color8u(255,0,0));
+	
 
-	drawLine(pixelArray, 400, 0, 320, 240, Color8u(0, 0, 255));
+	if(blured == 0 && time % 3 == 0){
+		console() << (rand() % 9) << endl;
+		trix1 = trix1 + (rand() % 5 - 2);
+		trix2 = trix2 + (rand() % 5 - 2);
+		trix3 = trix3 + (rand() % 5 - 2);
+		triy1 = triy1 + (rand() % 5 - 2);
+		triy2 = triy2 + (rand() % 5 - 2);
+		triy3 = triy3 + (rand() % 5 - 2);
+		circx = circx + (rand() % 5 - 2);
+		circy = circy + (rand() % 5 - 2);
+		col1 = col1 + (rand() % 41 - 20);
+		col2 = col2 + (rand() % 41 - 20);
+		col3 = col3 + (rand() % 41 - 20);
+	};
+
+	drawRect(pixelArray, 0, 0, 640, 480, Color8u(125 + col1, 125 + col2, 125 + col3));
+
+	drawRect(pixelArray, 300 + circx, 300 + triy2, 100 + triy1, 100 + trix1, Color8u(255, 0, 0));
+
+	drawCirc(pixelArray, 320 + circx, 240 + circy, 120, Color8u(255,0,0));
+
+	drawLine(pixelArray, 400 + trix3, 200 + trix1, 230 + triy2, 240 + triy3, Color8u(0, 0, 255));
+
+	drawTri(pixelArray, 30 + trix1, 300 + triy1, 500 + trix2, 40 + triy2, 420 + trix3, 355 + triy3, Color8u(200, 0, 100));
+
+	if(blured == 1)
+	blur(pixelArray, 1/9.0,  1/9.0,  1/9.0,  1/9.0, 1/9.0,  1/9.0,  1/9.0,  1/9.0,  1/9.0);
 
 	/*if(color1 != 0.0){
 	color1 = color1 - 0.015;
