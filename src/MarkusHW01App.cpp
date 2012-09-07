@@ -40,10 +40,16 @@ class MarkusHW01App : public AppBasic {
 	void drawTri(uint8_t* ar, int x, int y, int x2, int y2, int x3, int y3, Color8u c);
 	/**
 	*implement any kernel, in this program a blur is inplemented. All the values in the kernel can be changed though.
+	*REVIEW COMMENT: changed the line to illustrate the order in which the floats will represent the kernel
 	*/
-	void blur(uint8_t* ar, float a,  float b,  float c,  float d,  float e,  float f,  float g,  float h,  float i);
+	void blur(uint8_t* ar, float a,  float b,  float c,  
+						   float d,  float e,  float f,  
+						   float g,  float h,  float i);
 
   private:
+	//REVIEW COMMENT: set a constant variable for texture size, allows a future
+	//				  programmer to change the texture size without finding each instance in the code.
+	static const int TextureSize = 1024;
 	float color1;
 	float color2;
 	float color3;
@@ -58,7 +64,7 @@ class MarkusHW01App : public AppBasic {
 	int triy1;
 	int triy2;
 	int triy3;
-	int time;
+	int frameNumber;
 	int circx;
 	int circy;
 	int col1;
@@ -69,6 +75,7 @@ class MarkusHW01App : public AppBasic {
 
 void MarkusHW01App::setup()
 {
+
 	//variables for phase 0
 	color1 = 1.0;
 	color2 = 1.0;
@@ -82,14 +89,14 @@ void MarkusHW01App::setup()
 	triy1 = 0;
 	triy2 = 0;
 	triy3 = 0;
-	time = 0;
+	frameNumber = 0;
 	circx = 0;
 	circy = 0;
 	col1 = 0;
 	col2 = 0;
 	col3 = 0;
 	//creating the surface
-	mySurface_ = new Surface(1024,1024,false);
+	mySurface_ = new Surface(TextureSize,TextureSize,false);
 };
 
 void MarkusHW01App::mouseDown( MouseEvent event )
@@ -106,9 +113,9 @@ void MarkusHW01App::mouseDown( MouseEvent event )
 void MarkusHW01App::setPixel(uint8_t* ar, int x,int y, Color8u c)
 {
 	//set all three of the colors individually using the cordinates of the pixel
-	ar[y * 1024 * 3 + 3 * x] = c.r;
-	ar[y * 1024 * 3 + 3 * x + 1] = c.g;
-	ar[y * 1024 * 3 + 3 * x + 2] = c.b;
+	ar[y * TextureSize * 3 + 3 * x] = c.r;
+	ar[y * TextureSize * 3 + 3 * x + 1] = c.g;
+	ar[y * TextureSize * 3 + 3 * x + 2] = c.b;
 
 };
 
@@ -182,15 +189,20 @@ void MarkusHW01App::drawTri(uint8_t* ar, int x, int y, int x2, int y2, int x3, i
 	
 };
 
-void MarkusHW01App::blur(uint8_t* ar , float a,  float b,  float c,  float d,  float e,  float f,  float g,  float h,  float i){
+void MarkusHW01App::blur(uint8_t* ar , float a,  float b,  float c,  
+									   float d,  float e,  float f,  
+									   float g,  float h,  float i){
 	//creat a array to hold the kernel
-	float kernel [9] = {a,b,c,d,e,f,g,h,i};
+	//REVIEW COMMENT: changed the look of the kernal as I did above just to show how it will interact with the pixels
+	float kernel [9] = {a,b,c,
+						d,e,f,
+						g,h,i};
 	//travers the pixels colors and apply the kernel
 	for(int i = 0; i < 640; i++){
 		for(int j = 0; j < 480; j++){
-			ar[j * 1024 * 3 + 3 * i] = ar[(j - 1) * 1024 * 3 + 3 * (i - 1)] * kernel[0] + ar[(j - 1) * 1024 * 3 + 3 * (i)] * kernel[1] + ar[(j - 1) * 1024 * 3 + 3 * (i + 1)] * kernel[2] + ar[(j) * 1024 * 3 + 3 * (i - 1)] * kernel[3] + ar[(j) * 1024 * 3 + 3 * (i)] * kernel[4] + ar[(j) * 1024 * 3 + 3 * (i + 1)] * kernel[5] + ar[(j + 1) * 1024 * 3 + 3 * (i - 1)] * kernel[6] + ar[(j + 1) * 1024 * 3 + 3 * (i)] * kernel[7] + ar[(j + 1) * 1024 * 3 + 3 * (i + 1)] * kernel[8];
-			ar[j * 1024 * 3 + 3 * i + 1] = ar[(j - 1) * 1024 * 3 + 3 * (i - 1) + 1] * kernel[0] + ar[(j - 1) * 1024 * 3 + 3 * (i) + 1] * kernel[1] + ar[(j - 1) * 1024 * 3 + 3 * (i + 1) + 1] * kernel[2] + ar[(j) * 1024 * 3 + 3 * (i - 1) + 1] * kernel[3] + ar[(j) * 1024 * 3 + 3 * (i) + 1] * kernel[4] + ar[(j) * 1024 * 3 + 3 * (i + 1) + 1] * kernel[5] + ar[(j + 1) * 1024 * 3 + 3 * (i - 1) + 1] * kernel[6] + ar[(j + 1) * 1024 * 3 + 3 * (i) + 1] * kernel[7] + ar[(j + 1) * 1024 * 3 + 3 * (i + 1) + 1] * kernel[8];
-			ar[j * 1024 * 3 + 3 * i + 2] = ar[(j - 1) * 1024 * 3 + 3 * (i - 1) + 2] * kernel[0] + ar[(j - 1) * 1024 * 3 + 3 * (i) + 2] * kernel[1] + ar[(j - 1) * 1024 * 3 + 3 * (i + 1) + 2] * kernel[2] + ar[(j) * 1024 * 3 + 3 * (i - 1) + 2] * kernel[3] + ar[(j) * 1024 * 3 + 3 * (i) + 2] * kernel[4] + ar[(j) * 1024 * 3 + 3 * (i + 1) + 2] * kernel[5] + ar[(j + 1) * 1024 * 3 + 3 * (i - 1) + 2] * kernel[6] + ar[(j + 1) * 1024 * 3 + 3 * (i) + 2] * kernel[7] + ar[(j + 1) * 1024 * 3 + 3 * (i + 1) + 2] * kernel[8];
+			ar[j * TextureSize * 3 + 3 * i] = ar[(j - 1) * TextureSize * 3 + 3 * (i - 1)] * kernel[0] + ar[(j - 1) * TextureSize * 3 + 3 * (i)] * kernel[1] + ar[(j - 1) * TextureSize * 3 + 3 * (i + 1)] * kernel[2] + ar[(j) * TextureSize * 3 + 3 * (i - 1)] * kernel[3] + ar[(j) * TextureSize * 3 + 3 * (i)] * kernel[4] + ar[(j) * TextureSize * 3 + 3 * (i + 1)] * kernel[5] + ar[(j + 1) * TextureSize * 3 + 3 * (i - 1)] * kernel[6] + ar[(j + 1) * TextureSize * 3 + 3 * (i)] * kernel[7] + ar[(j + 1) * TextureSize * 3 + 3 * (i + 1)] * kernel[8];
+			ar[j * TextureSize * 3 + 3 * i + 1] = ar[(j - 1) * TextureSize * 3 + 3 * (i - 1) + 1] * kernel[0] + ar[(j - 1) * TextureSize * 3 + 3 * (i) + 1] * kernel[1] + ar[(j - 1) * TextureSize * 3 + 3 * (i + 1) + 1] * kernel[2] + ar[(j) * TextureSize * 3 + 3 * (i - 1) + 1] * kernel[3] + ar[(j) * TextureSize * 3 + 3 * (i) + 1] * kernel[4] + ar[(j) * TextureSize * 3 + 3 * (i + 1) + 1] * kernel[5] + ar[(j + 1) * TextureSize * 3 + 3 * (i - 1) + 1] * kernel[6] + ar[(j + 1) * TextureSize * 3 + 3 * (i) + 1] * kernel[7] + ar[(j + 1) * TextureSize * 3 + 3 * (i + 1) + 1] * kernel[8];
+			ar[j * TextureSize * 3 + 3 * i + 2] = ar[(j - 1) * TextureSize * 3 + 3 * (i - 1) + 2] * kernel[0] + ar[(j - 1) * TextureSize * 3 + 3 * (i) + 2] * kernel[1] + ar[(j - 1) * TextureSize * 3 + 3 * (i + 1) + 2] * kernel[2] + ar[(j) * TextureSize * 3 + 3 * (i - 1) + 2] * kernel[3] + ar[(j) * TextureSize * 3 + 3 * (i) + 2] * kernel[4] + ar[(j) * TextureSize * 3 + 3 * (i + 1) + 2] * kernel[5] + ar[(j + 1) * TextureSize * 3 + 3 * (i - 1) + 2] * kernel[6] + ar[(j + 1) * TextureSize * 3 + 3 * (i) + 2] * kernel[7] + ar[(j + 1) * TextureSize * 3 + 3 * (i + 1) + 2] * kernel[8];
 		};
 	};
 };
@@ -199,11 +211,17 @@ void MarkusHW01App::update()
 {
 	uint8_t* pixelArray = (*mySurface_).getData();
 
-	time++;
-
-	
+	//REVIEW COMMENT: changed time to frameNumber as that was actually what it was. 
+	frameNumber++;
+		
 	//create the random shifting of the shapes and colors
-	if(blured == 0 && time % 3 == 0){
+	//REVIEW COMMENT: In class you said that on the mouse interaction it was freezing. Actually, all you had to do
+	//				  was click again and it would reset blured = 0 and it would unblur and then the animation would
+	//				  would start again. I commented out the blured == 0 && part so that it continues to animate even
+	//				  though it is blured. There are some performance issues it seems and it might be a good idea to
+	//				  track the frame numbers between the two modes now.
+	if(//*blured == 0 && */
+		frameNumber % 3 == 0){
 		console() << (rand() % 9) << endl;
 		trix1 = trix1 + (rand() % 5 - 2);
 		trix2 = trix2 + (rand() % 5 - 2);
